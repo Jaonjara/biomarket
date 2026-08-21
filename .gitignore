@@ -1,0 +1,5 @@
+vendor
+public/uploads
+public/assets
+app/config/stripe.php
+app/config/stripe.php
