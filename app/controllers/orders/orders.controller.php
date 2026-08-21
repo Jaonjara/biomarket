@@ -119,6 +119,9 @@ function stripeSuccessController()
     }
 
     try {
+        $stripeConfig = require PATH . '/app/config/stripe.php';
+        \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
+
         // Récupérer la session Stripe
         $session = \Stripe\Checkout\Session::retrieve($session_id);
 
@@ -150,7 +153,11 @@ function stripeSuccessController()
         }
 
         // 1. Créer la commande
-        $orderId = storeOrder([$user_id, $shop_id, $total]);
+        $orderId = storeOrder([
+            "user_id" => $user_id,
+            "shop_id" => $shop_id,
+            "total_price" => $total
+        ]);
 
         // 2. Créer les order_items
         foreach ($products as $p) {
