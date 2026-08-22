@@ -176,7 +176,8 @@ function filterBgStatus($status)
                             <td class="table-table-body-row-data">
                                 <!-- 4 -->
                                 <span
-                                    class="table-table-body-row-data-badge table-table-body-row-data-badge-<?= filterBgStatus($order->status) ?>">
+                                    class="table-table-body-row-data-badge 
+                                    table-table-body-row-data-badge-<?= filterBgStatus($order->status) ?>">
                                     <?= $order->status ?>
                                 </span>
                             </td>

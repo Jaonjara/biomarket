@@ -1,3 +1,32 @@
+<?php
+
+/** @var object $total_categories */
+function filterBgStatus($status)
+{
+    switch ($status) {
+        case "stock faible":
+            return "yellow";
+        case "disponible":
+            return "green";
+        case "rupture":
+            return "red";
+    }
+}
+function categoryStatus(int $nb_product)
+{
+    if ($nb_product == 0) {
+        return "rupture";
+    } elseif ($nb_product <= 5) {
+        return "stock faible";
+    } else {
+        return "disponible";
+    }
+}
+
+?>
+
+
+
 <main class="dashboard">
     <section class="head">
         <div class="head-child">
@@ -17,8 +46,9 @@
                 <div class="head-card-item-stat">
                     <?php /** @var array $categories */
                     /** @var int $categoryId */
+                    /** @var object $total_categories */
                     ?>
-                    <p class="head-card-item-stat-title"><?= count($categories) ?></p>
+                    <p class="head-card-item-stat-title"><?= $total_categories ?></p>
                     <span class="head-card-item-stat-span">Catégories actives</span>
 
                     <!-- <span class="head-card-item-stat-span">Tous vos produits</span> -->
@@ -29,7 +59,7 @@
                     <i class="fa-regular fa-circle-check"></i>
                 </div>
                 <div class="head-card-item-stat">
-                    <p class="head-card-item-stat-title">13</p>
+                    <p class="head-card-item-stat-title"><?= $total_product ?></p>
                     <span class="head-card-item-stat-span">Produits associés</span>
                     <span class="head-card-item-stat-span"></span
                         </div>
@@ -49,12 +79,12 @@
             <!-- recherche -->
             <form action="/shop/category" class="table-search-form" method="GET">
                 <input
-                    value="<?php if (isset($_GET["name"])) {
-                                echo $_GET["name"];
+                    value="<?php if (isset($_GET["searchCategory"])) {
+                                echo $_GET["searchCategory"];
                             }
                             ?>"
                     type="search"
-                    name="name"
+                    name="searchCategory"
                     class="table-search-form-input"
                     placeholder="Rechercher un produit...">
                 <button type="submit" class="table-search-form-btn">
@@ -64,24 +94,18 @@
                     <a href="/shop/category" class="table-search-form-linkcontainer-link">Annuler</a>
                 </div>
             </form>
-            <div class="table-filterParent">
-                <div class="table-filterParent-filter">
-                    <i class="fa-solid fa-filter"></i>
-                    Filtrer
-                </div>
-            </div>
         </div>
         <table class="table-table">
             <thead class="table-table-head">
                 <tr class="table-table-head-row">
                     <th class="table-table-head-row-title">
-                        Image
-                    </th>
-                    <th class="table-table-head-row-title">
                         Nom de la catégorie
                     </th>
                     <th class="table-table-head-row-title">
-                        Produits
+                        Description
+                    </th>
+                    <th class="table-table-head-row-title">
+                        Nombre de produits
                     </th>
                     <th class="table-table-head-row-title">
                         Statut
@@ -108,13 +132,16 @@
 
                 <?php foreach ($categories as $category) { ?>
 
+                    <?php $status = categoryStatus($category->nb_product);
+                    $colorclass = filterBgStatus($status);
+                    ?>
+
                     <tr class="table-table-body-row-data">
-                        <td class="table-table-body-row-data">Image</td>
+                        <td class="table-table-body-row-data">
+                            <?= $category->description ?>
+                        </td>
                         <td class="table-table-body-row-data">
                             <div class="table-table-body-row-data-product">
-                                <div class="table-table-body-row-data-image">
-                                    <i class="fa fa-user"></i>
-                                </div>
                                 <?= $category->name ?>
                             </div>
 
@@ -123,15 +150,20 @@
                             <!-- 4 -->
                             <?= $category->nb_product ?>
                         </td>
-                        <td class="table-table-body-row-data">Active</td>
+                        <td class="table-table-body-row-data">
+
+                            <span
+                                class="table-table-body-row-data-badge
+                            table-table-body-row-data-badge-<?= $colorclass ?>"><?= $status ?></span>
+                        </td>
                         <td class="table-table-body-row-data">
                             <div class="table-table-body-row-data-icon">
                                 <!-- detail -->
-                                <form action="" class="table-table-body-row-data-form">
+                                <!-- <form action="" class="table-table-body-row-data-form">
                                     <button class="table-table-body-row-data-form-btn table-table-body-row-data-form-btn-view">
                                         <i class="fa-regular fa-eye"></i>
                                     </button>
-                                </form>
+                                </form> -->
                                 <!-- delete -->
                                 <form
                                     action="/shop/category/remove/<?= $category->id ?>"

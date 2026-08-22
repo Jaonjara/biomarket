@@ -5,14 +5,31 @@ require_once PATH . "/app/models/shop/category.php";
 // page list categ
 function shopCategoryController()
 {
-    $nameCategory = null;
+    // $nameCategory = null;
 
-    if (isset($_GET["name"])) {
-        $nameCategory = $_GET["name"];
+    // if (isset($_GET["name"])) {
+    //     $nameCategory = $_GET["name"];
+    // }
+    $shop_id = $_SESSION['shop']->id;
+
+    $searchCategory = null;
+
+    if (!isset($_SESSION['shop'])) {
+        redirectTo('/login');
+    }
+
+
+    if (isset($_GET['searchCategory'])) {
+        $searchCategory = $_GET['searchCategory'];
+        $categories = searchCategoryByShop($shop_id, $searchCategory);
+    } else {
+        $categories = findAllCategoriesByShopId($shop_id);
     }
 
     // var_dump($_SESSION['shop']);
-    $categories = findAllCategoryShop($nameCategory);
+    // $categories = findAllCategoryShop($nameCategory);
+    $total_categories = categoryCount($shop_id)->total_category;
+    $total_product = countProductInCategoryByShop($shop_id)->total_product;
     $title = "Catégories";
     require_once PATH . "/views/shop/layouts/sidebar.html.php";
     require_once PATH . "/views/shop/category/list.html.php";

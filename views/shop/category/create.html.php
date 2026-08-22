@@ -47,14 +47,6 @@
                 <?php } ?>
             </div>
         </div>
-        <div class="form-file">
-            <h3 class="form-file-title"><i class="fa-regular fa-image"></i> Image de la catégorie</h3>
-            <div class="form-file-content">
-
-                <label class="form-file-content-label">Ajouter une image</label>
-                <input type="file" name="image" class="form-file-content-input">
-            </div>
-        </div>
         <div class="form-button">
             <a href="/shop/category/create" class="form-button-link">
                 <i class="fa-solid fa-x"></i>
