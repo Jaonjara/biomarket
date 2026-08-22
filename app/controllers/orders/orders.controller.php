@@ -1,6 +1,7 @@
 <?php
 require_once PATH . '/app/models/orders/order.php';
 require_once PATH . '/app/models/cart.php';
+require_once PATH . '/app/models/notifications.php';
 
 
 // page commande
@@ -104,6 +105,76 @@ function createStripeCheckoutController(int $shop_id)
     };
 };
 
+// webhook pour eviter les erreur du client
+function stripeWebhookController()
+{
+    // charge la clé
+    $stripeConfig = require PATH . '/app/config/stripe.php';
+    \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
+
+    // recupere le contenue de requete stripe
+    $payload = @file_get_contents('php://input');
+    $event = null;
+
+    try {
+        $event = \Stripe\Event::constructFrom(
+            json_decode($payload, true)
+        );
+    } catch (\UnexpectedValueException $e) {
+        // payeload invalide
+        http_response_code(400);
+        exit();
+    }
+
+    // event paiement reussie
+    if ($event->type === 'checkout.session.completed') {
+
+        $session = $event->data->object;
+        // recupere metadata lors chechkout
+        $user_id = ($session->metadata->user_id ?? 0);
+        $shop_id = ($session->metadata->shop_id ?? 0);
+
+        if ($user_id > 0 && $shop_id > 0) {
+            // recupere panier et boutique
+            $products = findProductsInCartByShop($user_id, $shop_id);
+
+            if (!empty($products)) {
+                // Calcul du total
+                $total = 0;
+                foreach ($products as $p) {
+                    $total += $p->quantity_in_cart * $p->product_price;
+                }
+
+                // 1. Créer la commande
+                $orderId = storeOrder([
+                    "user_id" => $user_id,
+                    "shop_id" => $shop_id,
+                    "total_price" => $total
+                ]);
+
+                // créer Notification
+                $message = "Nouvelle commande " . $orderId . " à valider";
+                storeNotificationOrder($shop_id, $orderId, $message);
+
+                //  Créer les order_items
+                foreach ($products as $p) {
+                    storeOrderItem(
+                        $orderId,
+                        $p->product_id,
+                        $p->quantity_in_cart,
+                        $p->product_price
+                    );
+                }
+                // Vider le panier de cette boutique uniquement
+                deleteCartProductsByShop($user_id, $shop_id);
+            }
+        }
+    }
+    // reponse à stripe
+    http_response_code(200);
+};
+
+
 // stripe success
 function stripeSuccessController()
 {
@@ -118,132 +189,12 @@ function stripeSuccessController()
         redirectTo('/cart');
     }
 
-    try {
-        $stripeConfig = require PATH . '/app/config/stripe.php';
-        \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
-
-        // Récupérer la session Stripe
-        $session = \Stripe\Checkout\Session::retrieve($session_id);
-
-        // Vérifier que le paiement est bien payé
-        if ($session->payment_status !== 'paid') {
-            $_SESSION['error'] = 'Le paiement n\'a pas été validé.';
-            redirectTo('/cart');
-        }
-
-        $user_id = $_SESSION['user']->id;
-
-        // Sécurité : vérifier que c’est le bon utilisateur
-        if ((int)$session->metadata->user_id !== $user_id) {
-            redirectTo('/cart');
-        }
-
-        // Récupérer les produits encore dans le panier de cette boutique
-        $products = findProductsInCartByShop($user_id, $shop_id);
-
-        if (empty($products)) {
-            // Déjà traité
-            redirectTo('/user/profile/order');
-        }
-
-        // Calcul du total
-        $total = 0;
-        foreach ($products as $p) {
-            $total += $p->quantity_in_cart * $p->product_price;
-        }
-
-        // 1. Créer la commande
-        $orderId = storeOrder([
-            "user_id" => $user_id,
-            "shop_id" => $shop_id,
-            "total_price" => $total
-        ]);
-
-        // 2. Créer les order_items
-        foreach ($products as $p) {
-            storeOrderItem(
-                $orderId,
-                $p->product_id,
-                $p->quantity_in_cart,
-                $p->product_price
-            );
-        }
-
-        // 3. Vider le panier de cette boutique uniquement
-        deleteCartProductsByShop($user_id, $shop_id);
-
-        // 4. Afficher la page de succès
-        $title = "Paiement réussi";
-        require_once PATH . "/views/layouts/header.html.php";
-        require_once PATH . "/views/pages/account/order-success.html.php";
-        require_once PATH . "/views/layouts/footer.html.php";
-    } catch (Exception $e) {
-        $_SESSION['error'] = 'Erreur : ' . $e->getMessage();
-        redirectTo('/cart');
-    }
+    $title = "Paiement réussi";
+    require_once PATH . "/views/layouts/header.html.php";
+    require_once PATH . "/views/pages/account/order-success.html.php";
+    require_once PATH . "/views/layouts/footer.html.php";
 }
 
-
-
-
-// action payer
-// function checkoutController(int $shop_id)
-// {
-//     if (!isset($_SESSION['user'])) {
-//         redirectTo('/login');
-//     }
-
-//     $user_id = $_SESSION['user']->id;
-//     // recuperer produitdans panier
-//     $rawProducts = findAllProductInCart($user_id);
-
-
-//     // filter les produits du boutique uniquement
-//     $shopProducts = [];
-//     foreach ($rawProducts as $product) {
-//         if ($product->shop_id == $shop_id) {
-//             $shopProducts[] = $product;
-//         }
-//     }
-
-//     //calcul total shop selectionner
-//     $totalprice = 0;
-//     foreach ($rawProducts as $product) {
-//         if ($product->shop_id == $shop_id) {
-//             $subtotal = $product->product_price * $product->quantity_in_cart;
-//             $totalprice += $subtotal;
-//         }
-//     }
-
-//     $data = [
-//         "user_id" => $user_id,
-//         "shop_id" => $shop_id,
-//         "total_price" => $totalprice
-//     ];
-
-
-//     $order_id = storeOrder($data);
-
-//     // verifie si items appartiint a shop
-//     // foreach($item->shop_id == $shop_id)
-
-//     // enregister chaque produit dans order_items
-//     foreach ($rawProducts as $product) {
-//         if ($product->shop_id == $shop_id) {
-//             storeOrderItem(
-//                 $order_id,
-//                 $product->product_id,
-//                 $product->quantity_in_cart,
-//                 $product->product_price
-//             );
-//         };
-//     };
-
-//     // on supprime uniquements les produits du shop du panier
-//     deleteCartProductsByShop($user_id, $shop_id);
-
-//     redirectTo('/user/profile/order');
-// }
 
 // detail order
 function showOrderController(int $id)
@@ -251,11 +202,6 @@ function showOrderController(int $id)
     if (!isset($_SESSION['user'])) {
         redirectTo('/login');
     }
-
-    // recupere id du commande
-    // if (!isset($_GET['id'])) {
-    //     redirectTo('/cart');
-    // }
 
     $order_id = $id;
 

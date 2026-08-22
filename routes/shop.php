@@ -3,12 +3,16 @@ require_once PATH . "/app/controllers/shop/shopDashboard.controller.php";
 require_once PATH . "/app/controllers/shop/shopProducts.controller.php";
 require_once PATH . "/app/controllers/shop/shopCategory.controller.php";
 require_once PATH . "/app/middlewares/sellerMiddleware.php";
+require_once PATH . '/app/controllers/shop/shopOrder.controller.php';
+require_once PATH . '/app/controllers/shop/shopHeader.controller.php';
+require_once PATH . '/app/controllers/notifications/notifications.controller.php';
 
 
 
 // page dashboard
 $router->map('GET', '/shop/dashboard', function () {
     shopDashboardController();
+    // countUnreadNotificationsByShopController();
 });
 
 /***********************
@@ -95,4 +99,47 @@ $router->map('GET', '/shop/category/update/[i:id]', function ($id) {
 $router->map('POST', '/shop/category/update/[i:id]', function ($id) {
     sellerMiddleware();
     shopEditController($id);
+});
+
+
+/***********************
+ * ORDER
+ ***********************/
+
+// page order
+$router->map('GET', '/shop/order', function () {
+    sellerMiddleware();
+    shopOrdersController();
+});
+
+// valider order
+$router->map('POST', '/shop/order/validate/[i:order_id]', function ($order_id) {
+    sellerMiddleware();
+    validateOrderController($order_id);
+});
+
+// annuler order
+$router->map('POST', '/shop/order/cancel/[i:order_id]', function ($order_id) {
+    sellerMiddleware();
+    cancelOrderController($order_id);
+});
+
+// recherche
+$router->map('POST', '/shop/order/cancel/[i:order_id]', function ($order_id) {
+    sellerMiddleware();
+    cancelOrderController($order_id);
+});
+
+// recherche
+$router->map('GET', '/shop/order/detail/[i:order_id]', function ($order_id) {
+    sellerMiddleware();
+    showShopOrderController($order_id);
+});
+
+
+/***************************************************************************
+ * *************************** NOTIFICATIONS ****************************************
+ ***************************************************************************/
+$router->map('POST', '/shop/notifications/read/[i:notification_id][i:shop_id]', function ($notification_id, $shop_id) {
+    notificationsView($notification_id, $shop_id);
 });

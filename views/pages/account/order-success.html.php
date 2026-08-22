@@ -1,8 +1,8 @@
-<div class="container my-5 text-center">
-    <h1 class="text-success mb-4">Paiement réussi !</h1>
-    <p>Merci pour votre commande. Elle a bien été enregistrée.</p>
+<div class="stripe">
+    <h1 class="stripe-title">Paiement réussi !</h1>
+    <p class="stripe-para">Merci pour votre commande. Elle a bien été enregistrée.</p>
 
-    <a href="/user/profile/order" class="btn btn-primary mt-3">
+    <a href="/user/profile/order" class="stripe-link">
         Voir mes commandes
     </a>
 </div>

@@ -7,6 +7,7 @@ require_once PATH . "/app/controllers/shop.controller.php";
 require_once PATH . "/app/controllers/product.controller.php";
 require_once PATH . "/app/controllers/cart.controller.php";
 require_once PATH . "/app/controllers/comments.controller.php";
+require_once PATH . '/app/controllers/notifications/notifications.controller.php';
 
 
 
@@ -104,7 +105,6 @@ $router->map('POST', '/products/cart/add/[i:id]', function ($id) {
 $router->map('POST', '/products/cart/decrement/[i:id]', function ($id) {
     decrementProductInCartController($id);
 });
-
 
 
 

@@ -1,3 +1,9 @@
+<?php
+require_once PATH . '/app/models/notifications.php';
+$shop_id = $_SESSION['shop']->id;
+
+?>
+
 <div class="main">
     <section class="header">
 
@@ -21,12 +27,16 @@
 
                 <div class="header-right-icon">
                     <i class="fa-regular fa-bell"></i>
-                    <span class="header-right-icon-span header-right-icon-span-notification">10</span>
+                    <?php if (countUnreadNotificationsByShop($shop_id) > 0) { ?>
+                        <span class="header-right-icon-span header-right-icon-span-notification">
+                            <?= countUnreadNotificationsByShop($shop_id) ?>
+                        </span>
+                    <?php } ?>
                 </div>
-                <div class="header-right-icon">
+                <!-- <div class="header-right-icon">
                     <i class="fa-regular fa-envelope"></i>
                     <span class="header-right-icon-span">10</span>
-                </div>
+                </div> -->
             </div>
             <div class="header-right-profile">
                 <img

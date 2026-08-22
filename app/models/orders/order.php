@@ -84,3 +84,158 @@ function findOrderItemsByOrderId(int $order_id)
     ]);
     return $request->fetchAll();
 }
+
+//recuperer une commande avec infoclient
+function findOrderByIdAndShop(int $order_id, int $shop_id)
+{
+    $query = "SELECT orders.*,
+                    users.name AS client_name,
+                    users.firstname AS client_firstname,
+                    users.email AS client_email
+                    FROM orders
+                    INNER JOIN users ON orders.user_id = users.id
+                    WHERE orders.id = :order_id AND orders.shop_id = :shop_id";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "order_id" => $order_id,
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetch();
+}
+
+/*****************************************************************************************
+ * ********************************* SHOP ORDER *****************************************
+ ****************************************************************************************/
+
+
+
+// recuperer les commande en attentes
+function findOrderPendingByShopId(int $shop_id)
+{
+    $query = "SELECT * FROM orders WHERE shop_id = :shop_id AND status = 'en_attente'
+                        ORDER BY createdAt DESC";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetchAll();
+}
+
+// recuperer tous les orders du shop
+function findOrdersByShopId(int $shop_id)
+{
+    $query = "SELECT orders.*,
+                    users.name AS client_name,
+                    users.firstname AS client_firstname
+                        FROM orders
+                        INNER JOIN users ON users.id = orders.user_id                       
+                        WHERE orders.shop_id = :shop_id
+                        ORDER BY createdAt DESC";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetchAll();
+}
+
+// valider commande
+function validateOrder(int $order_id)
+{
+    $query = "UPDATE orders SET status = 'valider'
+                    WHERE id = :order_id";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "order_id" => $order_id
+    ]);
+    return true;
+}
+
+// annuler commande
+function cancelOrder(int $order_id)
+{
+    $query = "UPDATE orders SET status = 'annuler'
+                    WHERE id = :order_id";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "order_id" => $order_id
+    ]);
+    return true;
+}
+
+// compter order total
+function orderCount(int $shop_id)
+{
+    $query = "SELECT COUNT(*) AS order_count 
+                    FROM orders
+                    INNER JOIN shops ON shops.id = orders.shop_id
+                    WHERE orders.shop_id = :shop_id";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetch();
+}
+
+// compter order en attente
+function orderPendingCount(int $shop_id)
+{
+    $query = "SELECT COUNT(*) AS order_count 
+                    FROM orders
+                    WHERE shop_id = :shop_id
+                    AND status = 'en_attente' ";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetch();
+}
+
+
+// compter order valider
+function orderValidateCount(int $shop_id)
+{
+    $query = "SELECT COUNT(*) AS order_count 
+                    FROM orders
+                    WHERE shop_id = :shop_id
+                    AND status = 'valider' ";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetch();
+}
+
+// compter order annuler
+function orderCancelCount(int $shop_id)
+{
+    $query = "SELECT COUNT(*) AS order_count 
+                    FROM orders
+                    WHERE shop_id = :shop_id
+                    AND status = 'annuler' ";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id
+    ]);
+    return $request->fetch();
+}
+
+// recherche sur commande
+function searchOrderByShop(int $shop_id, string | null $searchOrder)
+{
+    $query = "SELECT orders.*,
+                    users.name AS client_name,
+                    users.firstname AS client_firstname
+                FROM orders
+                INNER JOIN users ON users.id = orders.user_id
+                WHERE orders.shop_id = :shop_id
+                AND (users.name LIKE :searchOrder
+                OR users.firstname LIKE :searchOrder
+                OR orders.status LIKE :searchOrder
+                OR orders.id LIKE :searchOrder)";
+    $request = connectToDatabase()->prepare($query);
+    $request->execute([
+        "shop_id" => $shop_id,
+        "searchOrder" => "%{$searchOrder}%"
+    ]);
+    return $request->fetchAll();
+}

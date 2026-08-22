@@ -3,6 +3,22 @@
 /** @var array $orders */
 ?>
 
+<?php
+
+function filterBgStatus($status)
+{
+    switch ($status) {
+        case "en_attente":
+            return "yellow";
+        case "valider":
+            return "green";
+        case "annuler":
+            return "red";
+    }
+}
+
+?>
+
 <!-- passe à la commande -->
 <section class="order">
     <h2 class="order-title">Mes commandes</h2>
@@ -31,8 +47,15 @@
                             <td class="order-child-table-data-title">
                                 <?= $order->total_price ?> Ar
                             </td>
-                            <td class="order-child-table-data-title">
+                            <!-- <td class="order-child-table-data-title">
                                 <?= $order->status ?>
+                            </td> -->
+                            <td class="table-table-body-row-data">
+                                <!-- 4 -->
+                                <span
+                                    class="table-table-body-row-data-badge table-table-body-row-data-badge-<?= filterBgStatus($order->status) ?>">
+                                    <?= $order->status ?>
+                                </span>
                             </td>
                             <td class="order-child-table-data-title">
                                 <?= $order->createdAt ?>

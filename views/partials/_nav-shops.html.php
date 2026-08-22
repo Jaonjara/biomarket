@@ -1,6 +1,8 @@
 <?php
 
 require_once PATH . "/app/models/shop/category.php";
+require_once PATH . '/app/models/notifications.php';
+$shop_id = $_SESSION['shop']->id;
 
 // $category = findCategoryShopById(int $id);
 
@@ -37,10 +39,11 @@ $linksItems = [
 
     [
         "links" => [
-            // "/shop/order"
+            "/shop/order"
         ],
         "title" => "Mes commandes",
-        "icon" => "fa-solid fa-cart-arrow-down"
+        "icon" => "fa-solid fa-cart-arrow-down",
+        "badge" => countUnreadNotificationsByShop($shop_id)
     ],
 
     [
@@ -101,6 +104,13 @@ $linksItems = [
                         ">
                         <i class="<?= $linkItem["icon"] ?>"></i>
                         <?= $linkItem["title"] ?>
+                        <?php if (isset($linkItem['badge']) > 0) { ?>
+                            <?php if (countUnreadNotificationsByShop($shop_id) > 0) { ?>
+                                <span class="notif">
+                                    <?= $linkItem['badge'] ?>
+                                </span>
+                            <?php } ?>
+                        <?php } ?>
                     </a>
                 </li>
             <?php } ?>
