@@ -1,6 +1,36 @@
 <?php
 
-/**@var object $products */ ?>
+/** @var array $products */
+/** @var int $totalProduct */ ?>
+<?php
+
+/** @var object $total_categories */
+function filterBgStatus($status)
+{
+    switch ($status) {
+        case "stock faible":
+            return "yellow";
+        case "disponible":
+            return "green";
+        case "rupture":
+            return "red";
+    }
+}
+function productStatus(int $totalProduct)
+{
+    /** @var array $products */
+    if ($totalProduct == 0) {
+        return "rupture";
+    } elseif ($totalProduct <= 5) {
+        return "stock faible";
+    } else {
+        return "disponible";
+    }
+}
+
+?>
+
+
 
 <main class="dashboard">
     <section class="head">
@@ -20,7 +50,7 @@
                 </div>
                 <div class="head-card-item-stat">
                     <span class="head-card-item-stat-span">Total produits</span>
-                    <p class="head-card-item-stat-title"><?= count($products) ?></p>
+                    <p class="head-card-item-stat-title"><?= $totalProduct ?? 0 ?></p>
 
                     <!-- <span class="head-card-item-stat-span">Tous vos produits</span> -->
                 </div>
@@ -30,8 +60,8 @@
                     <i class="fa-regular fa-circle-check"></i>
                 </div>
                 <div class="head-card-item-stat">
-                    <span class="head-card-item-stat-span">Disponibles</span>
-                    <p class="head-card-item-stat-title">13</p>
+                    <!-- <span class="head-card-item-stat-span">Disponibles</span> -->
+                    <!-- <p class="head-card-item-stat-title">13</p> -->
                     <span class="head-card-item-stat-span"></span
                         </div>
                 </div>
@@ -41,8 +71,8 @@
                     <i class="fa-regular fa-circle-pause"></i>
                 </div>
                 <div class="head-card-item-stat">
-                    <span class="head-card-item-stat-span">En rupture</span>
-                    <p class="head-card-item-stat-title">7</p>
+                    <!-- <span class="head-card-item-stat-span">En rupture</span> -->
+                    <!-- <p class="head-card-item-stat-title">7</p> -->
                     <!-- <span class="head-card-item-stat-span">Rupture de stock</span> -->
                 </div>
             </div>
@@ -51,8 +81,8 @@
                     <i class="fa-solid fa-ban"></i>
                 </div>
                 <div class="head-card-item-stat">
-                    <span class="head-card-item-stat-span">Brouillons</span>
-                    <p class="head-card-item-stat-title">2</p>
+                    <!-- <span class="head-card-item-stat-span">Brouillons</span> -->
+                    <!-- <p class="head-card-item-stat-title">2</p> -->
                     <!-- <span class="head-card-item-stat-span">Non publiés</span> -->
                 </div>
             </div>
@@ -66,12 +96,12 @@
         <div class="table-search">
             <form action="/shop/products" class="table-search-form" method="GET">
                 <input
-                    value="<?php if (isset($_GET["name"])) {
-                                echo $_GET["name"];
+                    value="<?php if (isset($_GET["searchproduct"])) {
+                                echo $_GET["searchproduct"];
                             }
                             ?>"
                     type="search"
-                    name="name"
+                    name="searchproduct"
                     class="table-search-form-input"
                     placeholder="Rechercher un produit...">
                 <button type="submit" class="table-search-form-btn">
@@ -81,112 +111,134 @@
                     <a href="/shop/products" class="table-search-form-linkcontainer-link">Annuler</a>
                 </div>
             </form>
-            <div class="table-filterParent">
+            <!-- <div class="table-filterParent">
                 <div class="table-filterParent-filter">
                     <i class="fa-solid fa-filter"></i>
                     Filtrer
                 </div>
-            </div>
+            </div> -->
         </div>
-        <table class="table-table">
-            <thead class="table-table-head">
-                <tr class="table-table-head-row">
+        <?php if (empty($products)) { ?>
+            <h2 style="text-align: center;">Aucun produit pour l'instant</h2>
+        <?php } else { ?>
+            <table class="table-table">
+                <thead class="table-table-head">
+                    <tr class="table-table-head-row">
 
-                    <th class="table-table-head-row-title">
-                        Image
-                    </th>
-                    <th class="table-table-head-row-title">
-                        Produit
-                    </th>
-                    <th class="table-table-head-row-title">
-                        Catégorie
-                    </th>
-                    <th class="table-table-head-row-title">
-                        Prix
-                    </th>
-                    <th class="table-table-head-row-title">
-                        Quantité
-                    </th>
-                    <th class="table-table-head-row-title">
-                        Statut
-                    </th>
-                    <th class="table-table-head-row-title">
-                        Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="table-table-body">
-                <?php if (isset($_SESSION["delete-product"])) { ?>
-                    <script>
-                        Swal.fire({
-                            position: "center",
-                            icon: "success",
-                            title: "<?= $_SESSION["delete-product"] ?>",
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    </script>
-                    <?php unset($_SESSION["delete-product"]); ?>
-                <?php } ?>
-                <?php foreach ($products as $product) { ?>
-                    <tr class="table-table-body-row-data">
-                        <td class="table-table-body-row-data">
-                            <div class="table-table-body-row-data-image">
-                                <img src="<?= $product->image ?>" alt="" height="80px" width="100%">
-                            </div>
-                        </td>
-                        <td class="table-table-body-row-data">
-                            <div class="table-table-body-row-data-product">
-                                <?= $product->name ?>
-                            </div>
+                        <th class="table-table-head-row-title">
+                            Image
+                        </th>
+                        <th class="table-table-head-row-title">
+                            Produit
+                        </th>
+                        <th class="table-table-head-row-title">
+                            Catégorie
+                        </th>
+                        <!-- <th class="table-table-head-row-title">
+                        Description
+                    </th> -->
+                        <th class="table-table-head-row-title">
+                            Prix
+                        </th>
+                        <th class="table-table-head-row-title">
+                            Quantité
+                        </th>
+                        <th class="table-table-head-row-title">
+                            Statut
+                        </th>
+                        <th class="table-table-head-row-title">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="table-table-body">
+                    <?php if (isset($_SESSION["delete-product"])) { ?>
+                        <script>
+                            Swal.fire({
+                                position: "center",
+                                icon: "success",
+                                title: "<?= $_SESSION["delete-product"] ?>",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        </script>
+                        <?php unset($_SESSION["delete-product"]); ?>
+                    <?php } ?>
+                    <?php foreach ($products as $product) { ?>
+                        <?php $status = productStatus($product->quantity);
+                        $colorclass = filterBgStatus($status);
+                        ?>
 
-                        </td>
-                        <td class="table-table-body-row-data">
-                            <?= $product->category_name ?>
-                        </td>
-                        <td class="table-table-body-row-data">
-                            <?= $product->price ?> / Kg
-                        </td>
-                        <td class="table-table-body-row-data">
-                            <?= $product->quantity ?>
-                        </td>
-                        <td class="table-table-body-row-data">Disponible</td>
-                        <td class="table-table-body-row-data">
 
-                            <div class="table-table-body-row-data-icon">
-                                <!-- detail -->
-                                <form action="" class="table-table-body-row-data-form">
+                        <tr class="table-table-body-row-data">
+                            <td class="table-table-body-row-data">
+                                <div class="table-table-body-row-data-image">
+                                    <img src="<?= $product->image ?>" alt="" height="80px" width="100%">
+                                </div>
+                            </td>
+                            <td class="table-table-body-row-data">
+                                <div class="table-table-body-row-data-product">
+                                    <?= $product->name ?>
+                                </div>
+
+                            </td>
+                            <td class="table-table-body-row-data">
+                                <?= $product->category_name ?>
+                            </td>
+                            <!-- <td class="table-table-body-row-data">
+                            <?= $product->description ?>
+                        </td> -->
+                            <td class="table-table-body-row-data">
+                                <?= $product->price ?>Ar / Kg
+                            </td>
+                            <td class="table-table-body-row-data">
+                                <?= $product->quantity ?> Kg
+                            </td>
+                            <!-- <td class="table-table-body-row-data">Disponible</td> -->
+                            <td class="table-table-body-row-data">
+
+                                <span
+                                    class="table-table-body-row-data-badge
+                                table-table-body-row-data-badge-<?= $colorclass ?>"><?= $status ?>
+                                </span>
+                            </td>
+                            <td class="table-table-body-row-data">
+
+                                <div class="table-table-body-row-data-icon">
+                                    <!-- detail -->
+                                    <!-- <form action="" class="table-table-body-row-data-form">
                                     <button class="table-table-body-row-data-form-btn table-table-body-row-data-form-btn-view">
                                         <i class="fa-regular fa-eye"></i>
                                     </button>
-                                </form>
-                                <!-- delete -->
-                                <form
-                                    action="/shop/products/remove/<?= $product->id ?>"
-                                    method="POST"
-                                    id="delete-form-<?= $product->id ?>">
+                                </form> -->
+                                    <!-- delete -->
+                                    <form
+                                        action="/shop/products/remove/<?= $product->id ?>"
+                                        method="POST"
+                                        id="delete-form-<?= $product->id ?>">
 
-                                    <button
-                                        type="button"
-                                        class="table-table-body-row-data-form-btn"
-                                        onclick="confirmDelete(<?= $product->id ?>)">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </form>
-                                <!-- edit -->
-                                <form action="" class="table-table-body-row-data-form">
+                                        <button
+                                            type="button"
+                                            class="table-table-body-row-data-form-btn"
+                                            onclick="confirmDelete(<?= $product->id ?>)">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                    <!-- edit -->
+                                    <form action="" class="table-table-body-row-data-form">
 
-                                    <a href="/shop/products/update/<?= $product->id ?>"
-                                        class="table-table-body-row-data-form-btn table-table-body-row-data-form-btn-edit">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                </form>
-                            </div>
+                                        <a href="/shop/products/update/<?= $product->id ?>"
+                                            class="table-table-body-row-data-form-btn table-table-body-row-data-form-btn-edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                    </form>
+                                </div>
 
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php }  ?>
     </section>
 </main>

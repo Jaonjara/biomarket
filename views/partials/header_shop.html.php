@@ -8,19 +8,36 @@ $shop_id = $_SESSION['shop']->id;
     <section class="header">
 
 
-        <form action="" class="header-form" method="">
+        <!-- <form action="" class="header-form" method="">
             <input
 
                 type="search"
                 name="name"
                 class="header-form-input"
                 placeholder="Rechercher un produit...">
-            <!-- <button type="submit" class="header-form-btn">
+            <button type="submit" class="header-form-btn">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
             <div class="header-form-linkcontainer">
                 <a href="/dashboard" class="table-search-form-linkcontainer-link">Annuler</a>
-            </div> -->
+            </div>
+        </form> -->
+        <form action="/shop/search" class="table-search-form" method="GET">
+            <input
+                value="<?php if (isset($_GET["searchglobal"])) {
+                            echo $_GET["searchglobal"];
+                        }
+                        ?>"
+                type="search"
+                name="searchglobal"
+                class="table-search-form-input"
+                placeholder="Rechercher un produit...">
+            <button type="submit" class="table-search-form-btn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <div class="table-search-form-linkcontainer">
+                <a href="/shop/dashboard" class="table-search-form-linkcontainer-link">Annuler</a>
+            </div>
         </form>
         <div class="header-right">
             <div class="header-right-child">

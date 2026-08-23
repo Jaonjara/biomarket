@@ -8,14 +8,23 @@ require_once PATH . "/app/models/shop/shop.php";
 // page list produit
 function shopProductsController()
 {
-    $nameProduct = null;
+    $shop_id = $_SESSION['shop']->id;
 
-    if (isset($_GET["name"])) {
-        $nameProduct = $_GET["name"];
+    $searchproduct = null;
+
+    if (!isset($_SESSION['shop'])) {
+        redirectTo('/login');
     }
 
-    $products = findAllProduct($nameProduct);
+    if (isset($_GET['searchproduct'])) {
+        $searchproduct = $_GET['searchproduct'];
+        $products = searchProductByShop($shop_id, $searchproduct);
+    } else {
+        $products = findAllProductsByShopId($shop_id);
+    }
+
     $title = "Produit";
+    $totalProduct = productCount($shop_id)->total_product;
     require_once PATH . "/views/shop/layouts/sidebar.html.php";
     require_once PATH . "/views/shop/products/list.html.php";
     require_once PATH . "/views/shop/layouts/footer.html.php";
@@ -24,9 +33,13 @@ function shopProductsController()
 // page ajouter produit
 function shopCreateProductController($errors = [])
 {
-    // pour afficher category
-    $nameCategory = null;
-    $categories = findAllCategoryShop($nameCategory);
+    if (!isset($_SESSION['shop'])) {
+        redirectTo('/login');
+    }
+
+    $shop_id = $_SESSION['shop']->id;
+    // $categories = findAllCategoryShop();
+    $categories = findAllCategoriesByShopId($shop_id);
 
     // var_dump($errors);
     $title = "Nouveau produit";
@@ -41,16 +54,12 @@ function shopStoreProductController()
     $errors = [];
 
     // recupere user_id
-    if (isset($_SESSION['user'])) {
-        $user_id = $_SESSION['user']->id;
+    if (!isset($_SESSION['shop'])) {
+        redirectTo('/login');
     }
 
-    // recupere shop_id
-    $shopdata = findShopIdBySessionUser($user_id);
-    $shop_id = $shopdata->id;
+    $shop_id = $_SESSION['shop']->id;
 
-
-    $nameCategory = null;
 
     $category_id = $_POST["category_id"] ?? null;
     $name = htmlspecialchars(trim($_POST['name'])) ?? "";
@@ -60,7 +69,7 @@ function shopStoreProductController()
     $image = $_FILES['image'];
 
     // recuperer category_id
-    $categoriesInDb = findAllCategoryShop($nameCategory);
+    $categoriesInDb = findAllCategoriesByShopId($shop_id);
 
     $categories = [];
 
@@ -158,21 +167,23 @@ function shopRemoveProductController(int $id)
 {
     // var_dump($id);
     removeProductShopById($id);
-    // $_SESSION["delete-product"] = "Le produit est supprimée!";
+    $_SESSION["delete-product"] = "Le produit est supprimée!";
     redirectTo("/shop/products");
 }
 
 // update page
 function shopPageUpdateProductController(int $id, $errors = [])
 {
-    $product = findProductShopById($id);
 
-    if (!isset($id)) {
-        redirectTo("/shop/products");
+    if (!isset($_SESSION['shop'])) {
+        redirectTo("/login");
     }
 
-    $nameCategory = null;
-    $categories = findAllCategoryShop($nameCategory);
+    $shop_id = $_SESSION['shop']->id;
+
+    $product = findProductShopById($id, $shop_id);
+    // $categories = findAllCategoryShop($nameCategory);
+    $categories = findAllCategoriesByShopId($shop_id);
     // var_dump($product);
 
     $title = "Modifier produit";
@@ -186,7 +197,12 @@ function shopPageUpdateProductController(int $id, $errors = [])
 function shopEditProductController(int $id, $errors = [])
 {
     $errors = [];
-    $nameCategory = null;
+
+    if (!isset($_SESSION['shop'])) {
+        redirectTo("/login");
+    }
+
+    $shop_id = $_SESSION['shop']->id;
 
     $category_id = $_POST["category_id"] ?? null;
     $name = htmlspecialchars(trim($_POST['name'])) ?? "";
@@ -195,7 +211,7 @@ function shopEditProductController(int $id, $errors = [])
     $quantity = htmlspecialchars(trim($_POST['quantity'])) ?? 0;
     $image = $_FILES['image'];
 
-    $categoriesInDb = findAllCategoryShop($nameCategory);
+    $categoriesInDb = findAllCategoriesByShopId($shop_id);
 
     $categories = [];
 

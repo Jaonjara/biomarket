@@ -146,7 +146,6 @@ function filterBgStatus($status)
                     </script>
                     <?php unset($_SESSION["validate"]); ?>
                 <?php } ?>
-
                 <?php if (isset($_SESSION["cancel"])) { ?>
                     <script>
                         Swal.fire({
@@ -161,7 +160,7 @@ function filterBgStatus($status)
                 <?php } ?>
 
                 <?php if (!isset($orders)) { ?>
-                    <h2 class="vide">Aucun commande pour l'instant.</h2>
+                    <h2 class="vide">Aucune commande pour l'instant.</h2>
                 <?php } else { ?>
                     <?php foreach ($orders as $order) { ?>
                         <tr class="table-table-body-row-data">

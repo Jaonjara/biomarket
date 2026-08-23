@@ -6,6 +6,7 @@ require_once PATH . "/app/middlewares/sellerMiddleware.php";
 require_once PATH . '/app/controllers/shop/shopOrder.controller.php';
 require_once PATH . '/app/controllers/shop/shopHeader.controller.php';
 require_once PATH . '/app/controllers/notifications/notifications.controller.php';
+require_once PATH . '/app/controllers/shop/shopSearch.controller.php';
 
 
 
@@ -142,4 +143,13 @@ $router->map('GET', '/shop/order/detail/[i:order_id]', function ($order_id) {
  ***************************************************************************/
 $router->map('POST', '/shop/notifications/read/[i:notification_id][i:shop_id]', function ($notification_id, $shop_id) {
     notificationsView($notification_id, $shop_id);
+});
+
+
+
+/*************************************************************************
+ **************************** SEARCH ************************************
+ *************************************************************************/
+$router->map('GET', '/shop/search', function () {
+    shopGlobalSearchController();
 });

@@ -46,13 +46,13 @@ $linksItems = [
         "badge" => countUnreadNotificationsByShop($shop_id)
     ],
 
-    [
-        "links" => [
-            // "/shop/dashboard"
-        ],
-        "title" => "Messages",
-        "icon" => "fa-regular fa-envelope"
-    ],
+    // [
+    //     "links" => [
+    //         // "/shop/dashboard"
+    //     ],
+    //     "title" => "Messages",
+    //     "icon" => "fa-regular fa-envelope"
+    // ],
 
     [
         "links" => [

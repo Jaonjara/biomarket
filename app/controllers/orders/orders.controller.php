@@ -183,7 +183,7 @@ function stripeSuccessController()
     }
 
     $session_id = $_GET['session_id'] ?? null;
-    $shop_id    = (int)($_GET['shop_id'] ?? 0);
+    $shop_id    = $_GET['shop_id'] ?? 0;
 
     if (!$session_id || !$shop_id) {
         redirectTo('/cart');

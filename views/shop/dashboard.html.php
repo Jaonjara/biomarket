@@ -1,3 +1,10 @@
+<?php
+
+/** @var int $total_categories */
+/** @var int $totalProduct */
+/** @var int $orderpending */
+?>
+
 <main class="dashboard">
     <section class="head">
         <div class="head-child">
@@ -13,8 +20,8 @@
                     <i class="fa-solid fa-bag-shopping"></i>
                 </div>
                 <div class="head-card-item-stat">
-                    <span class="head-card-item-stat-span">Produits publiés</span>
-                    <p class="head-card-item-stat-title">19</p>
+                    <span class="head-card-item-stat-span">Total catégories</span>
+                    <p class="head-card-item-stat-title"><?= $total_categories ?? 0 ?></p>
                 </div>
             </div>
             <div class="head-card-item">
@@ -22,8 +29,8 @@
                     <i class="fa-solid fa-box"></i>
                 </div>
                 <div class="head-card-item-stat">
-                    <span class="head-card-item-stat-span">Produits en rupture</span>
-                    <p class="head-card-item-stat-title">3</p>
+                    <span class="head-card-item-stat-span">Produits</span>
+                    <p class="head-card-item-stat-title"><?= $totalProduct ?? 0 ?></p>
                 </div>
             </div>
             <div class="head-card-item">
@@ -32,7 +39,7 @@
                 </div>
                 <div class="head-card-item-stat">
                     <span class="head-card-item-stat-span">Commandes en attente</span>
-                    <p class="head-card-item-stat-title">7</p>
+                    <p class="head-card-item-stat-title"><?= $orderpending ?? 0 ?></p>
                 </div>
             </div>
             <div class="head-card-item">
